@@ -1,10 +1,12 @@
 /* bogazici reviews widget - otomatik uretildi */
 (function(){
 "use strict";
-var D={"enabled": false, "rating": 0.0, "count": 0, "google_url": "", "title": "Google Değerlendirmesi", "reviews": []};
+var D={"enabled": true, "rating": 4.4, "count": 64, "google_url": "https://maps.app.goo.gl/zcxYvwg5YRdy53bL9", "title": "Google Değerlendirmesi", "reviews": [{"name": "Rowan Ahmed", "stars": 5, "date": "5 ay önce", "photo": "https://lh3.googleusercontent.com/a/ACg8ocI0MCc6WgFNsFpT9eb5zntxbh555Srz7Xxcip29eOFCuTqmeg=w120-h120-p-rp-mo-ba12-br100", "text": "Bir haftadır dizüstü bilgisayarımın şarj cihazı bozulmuştu ve Kütahya'da birçok yere gittim ama kimse bana yardımcı olamadı. Bana yeni bir şarj cihazı almam gerektiğini söylediler. Ancak burası cihazımı hızlı bir şekilde ve kısa sürede, çok uygun bir fiyata tamir etti, çok teşekkür ederim."}, {"name": "ismail tetik", "stars": 5, "date": "6 yıl önce", "photo": "https://lh3.googleusercontent.com/a-/ALV-UjXmDO6uDz14hV6K8RvfFn2r5kDkRljAHelvtvc1kU_zZ3N82yhmpA=w120-h120-p-rp-mo-br100", "text": "Dürüst bir firma güvenilir yalan,sahtekarlık yok fiatı ve arızalı olan parça söylenir zamanında teslimat yapılır.Teşekkürler Boğaziçi 👍"}, {"name": "YaLÇıN KüTaHYa", "stars": 5, "date": "6 yıl önce", "photo": "https://lh3.googleusercontent.com/a-/ALV-UjU0Wvfms69C9a9rfCO6sH2dpTlaJYo3WpPCHvxt-luLkbwpMTxe=w120-h120-p-rp-mo-br100", "text": "Boğaziçi Bilgisayar ilgi ve alakalı,işlerini özenle yapan,bilgili,tecrübeli teknik elemanları ve dürüst esnaflığı ile yıllardır hizmet veren bir firmadır."}, {"name": "Murat Özburma", "stars": 5, "date": "5 yıl önce", "photo": "https://lh3.googleusercontent.com/a-/ALV-UjUa9C-hfH5wpY8LPAAfvzGKveko3pRbuE9fmFfgn7hbr-uHwTiE=w120-h120-p-rp-mo-br100", "text": "İlgililer ve işini iyi yapıyorlar, çok yardımcı oldular. Tavsiye ederim."}, {"name": "Amigo Ogima", "stars": 5, "date": "7 yıl önce", "photo": "https://lh3.googleusercontent.com/a-/ALV-UjWMQWGmRl0sJjbpIgEuLOtGR8gvZAA8Lok4HjDi6slGugL1FL4r=w120-h120-p-rp-mo-ba12-br100", "text": "A kalitede hizmet aldım. Fatih, Mustafa, Cavit beye ilgilerinden dolayı teşekkür ederim"}, {"name": "atakan Kaynar", "stars": 5, "date": "3 yıl önce", "photo": "https://lh3.googleusercontent.com/a/ACg8ocJokMrkM_0ZZq5zSbWDcHBTRXRVop9DkKjO4zgz5bDZSXzvBA=w120-h120-p-rp-mo-ba12-br100", "text": "Gayet iyi bilgisayarci.Her zaman ona veririm.Bilgisayara su dokuldu onu bile yapti."}]};
 if(!D||!D.enabled)return;
-var R=D.reviews||[];
+var R=(D.reviews||[]).slice();
 if(!R.length&&!(D.rating>0))return;
+/* rastgele gösterim: her sayfa yüklemede farklı sıra (Fisher-Yates) */
+for(var z=R.length-1;z>0;z--){var jj=Math.floor(Math.random()*(z+1));var tt=R[z];R[z]=R[jj];R[jj]=tt;}
 var cs=document.currentScript;
 var host=document.getElementById('bogazici-reviews');
 if(!host){if(!cs||!cs.parentNode)return;host=document.createElement('div');cs.parentNode.insertBefore(host,cs);}
@@ -24,7 +26,8 @@ var css=""
 +".bgzr-row{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}"
 +".bgzr-card{flex:0 0 260px;scroll-snap-align:start;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:14px}"
 +".bgzr-chead{display:flex;align-items:center;gap:9px;margin-bottom:6px}"
-+".bgzr-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex:0 0 auto}"
++".bgzr-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex:0 0 auto;overflow:hidden}"
++".bgzr-av img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}"
 +".bgzr-nm{font-size:13px;font-weight:600;color:#fff;line-height:1.2}"
 +".bgzr-dt{font-size:11px;color:#8a8aa0;margin-top:2px}"
 +".bgzr-cstars{font-size:12px;margin:2px 0 8px}"
@@ -46,7 +49,9 @@ host.appendChild(head);
 if(R.length){var row=el('div','bgzr-row');
 for(var i=0;i<R.length;i++){(function(r,i){
 var c=el('div','bgzr-card');var ch=el('div','bgzr-chead');
-var av=el('span','bgzr-av',(r.name||'?').trim().charAt(0).toUpperCase());av.style.background=AV[i%AV.length];
+var av=el('span','bgzr-av');
+if(r.photo&&/^https:\/\//.test(r.photo)){var im=document.createElement('img');im.alt='';im.loading='lazy';im.referrerPolicy='no-referrer';im.onerror=function(){try{im.remove();}catch(e){}av.textContent=(r.name||'?').trim().charAt(0).toUpperCase();av.style.background=AV[i%AV.length];};im.src=r.photo;av.appendChild(im);av.style.background='#2a2a3a';}
+else{av.textContent=(r.name||'?').trim().charAt(0).toUpperCase();av.style.background=AV[i%AV.length];}
 var meta=el('span');meta.appendChild(el('div','bgzr-nm',r.name||''));if(r.date)meta.appendChild(el('div','bgzr-dt',r.date));
 ch.appendChild(av);ch.appendChild(meta);c.appendChild(ch);
 var cst=el('div','bgzr-cstars');cst.appendChild(stars(r.stars||5));c.appendChild(cst);
