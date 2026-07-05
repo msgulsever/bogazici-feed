@@ -57,5 +57,21 @@ ch.appendChild(av);ch.appendChild(meta);c.appendChild(ch);
 var cst=el('div','bgzr-cstars');cst.appendChild(stars(r.stars||5));c.appendChild(cst);
 c.appendChild(el('div','bgzr-tx',r.text||''));row.appendChild(c);
 })(R[i],i);}
-host.appendChild(row);}
+host.appendChild(row);
+/* otomatik kaydirma: 4sn'de bir kart saga, sonda basa don; hover/dokunmada durur */
+(function(){
+if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+var paused=false,rt=null;
+row.addEventListener('mouseenter',function(){paused=true;});
+row.addEventListener('mouseleave',function(){paused=false;});
+row.addEventListener('touchstart',function(){paused=true;clearTimeout(rt);rt=setTimeout(function(){paused=false;},8000);},{passive:true});
+setInterval(function(){
+if(paused||!row.clientWidth)return;
+var card=row.querySelector('.bgzr-card');if(!card)return;
+var step=card.offsetWidth+12;
+var max=row.scrollWidth-row.clientWidth;
+if(row.scrollLeft>=max-8){row.scrollTo({left:0,behavior:'smooth'});}
+else{row.scrollBy({left:step,behavior:'smooth'});}
+},4000);
+})();}
 })();
