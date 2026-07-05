@@ -65,13 +65,21 @@ var paused=false,rt=null;
 row.addEventListener('mouseenter',function(){paused=true;});
 row.addEventListener('mouseleave',function(){paused=false;});
 row.addEventListener('touchstart',function(){paused=true;clearTimeout(rt);rt=setTimeout(function(){paused=false;},8000);},{passive:true});
+/* behavior:'smooth' bazi temalarda calismiyor -> kendi rAF animasyonumuz */
+function glide(to){
+var from=row.scrollLeft,d=to-from,t0=null;
+if(!d)return;
+row.style.scrollSnapType='none';
+function stepf(ts){if(!t0)t0=ts;var p=Math.min(1,(ts-t0)/450);var e=1-Math.pow(1-p,3);
+row.scrollLeft=from+d*e;
+if(p<1){requestAnimationFrame(stepf);}else{row.style.scrollSnapType='';}}
+requestAnimationFrame(stepf);}
 setInterval(function(){
 if(paused||!row.clientWidth)return;
 var card=row.querySelector('.bgzr-card');if(!card)return;
 var step=card.offsetWidth+12;
 var max=row.scrollWidth-row.clientWidth;
-if(row.scrollLeft>=max-8){row.scrollTo({left:0,behavior:'smooth'});}
-else{row.scrollBy({left:step,behavior:'smooth'});}
+glide(row.scrollLeft>=max-8?0:Math.min(max,row.scrollLeft+step));
 },4000);
 })();}
 })();
