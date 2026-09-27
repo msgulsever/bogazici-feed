@@ -145,3 +145,21 @@ body.current-page-page-detail .contentbox-body nav.card li { margin-bottom: .35e
   body.current-page-page-detail .contentbox-body li { font-size: 15.5px; }
   body.current-page-page-detail .contentbox-body h2 { font-size: 20px; }
 }
+
+/* ── Word'den yapismis satir ici stilleri notrle ───────────────────────────
+   Yasal sayfalar Word'den yapistirilmis: paragraflarda line-height:100%,
+   tablo hucrelerinde padding:0in ve 3pt cift cerceve var. Bunlar stil
+   dosyasini eziyordu; yalnizca bu sayfalarda ve yalnizca bu ozelliklerde
+   !important kullaniyoruz. */
+body.current-page-page-detail .contentbox-body [style*="line-height"] {
+  line-height: 1.75 !important;
+}
+body.current-page-page-detail .contentbox-body td[style],
+body.current-page-page-detail .contentbox-body th[style] {
+  padding: 9px 12px !important;
+  border: 1px solid #e3e8ee !important;
+}
+body.current-page-page-detail .contentbox-body [style*="margin-bottom: 0in"],
+body.current-page-page-detail .contentbox-body [style*="margin-top: 0in"] {
+  margin-bottom: 1.05em !important;
+}
