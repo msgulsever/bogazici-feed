@@ -39,12 +39,19 @@ body.current-page-page-detail .contentbox-body p { margin: 0 0 1.05em; }
 
 /* Okuma olcusu: 109 karakterlik satir olculdu, okunabilir aralik 45-75.
    Kapsayici 860px kaliyor ki kart/tablo genis durabilsin; yalniz METIN
-   bloklari daraliyor. ch birimi yazi tipine gore kendini ayarliyor. */
-body.current-page-page-detail .contentbox-body > p,
-body.current-page-page-detail .contentbox-body > ul,
-body.current-page-page-detail .contentbox-body > ol,
-body.current-page-page-detail .contentbox-body > div > p,
+   bloklari daraliyor. ch birimi yazi tipine gore kendini ayarliyor.
+   Kart, tablo ve cip icindekiler muaf - onlar zaten dar. */
+body.current-page-page-detail .contentbox-body p,
+body.current-page-page-detail .contentbox-body ul,
+body.current-page-page-detail .contentbox-body ol,
 body.current-page-page-detail .contentbox-body details > div { max-width: 66ch; }
+
+body.current-page-page-detail .contentbox-body .card p,
+body.current-page-page-detail .contentbox-body .card ul,
+body.current-page-page-detail .contentbox-body .card ol,
+body.current-page-page-detail .contentbox-body .alert,
+body.current-page-page-detail .contentbox-body td p,
+body.current-page-page-detail .contentbox-body table { max-width: none; }
 
 body.current-page-page-detail .contentbox-body h2 {
   font-size: 23px;
