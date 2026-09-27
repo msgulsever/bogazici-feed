@@ -1,0 +1,128 @@
+/* ── İçerik sayfaları tipografisi (bogazici) ──────────────────────────────
+   Yalnızca body.current-page-page-detail, yani Sayfalar bölümündeki metin
+   sayfaları. Ürün (product-detail), kategori (product-list-filter) ve
+   anasayfa (default-entry) bu kuralların DIŞINDA - onlara dokunulmuyor.
+
+   Neden: gövde metni 12px ve satırlar 1412px (~235 karakter) genişlikteydi.
+   Okunabilir aralık 60-75 karakter, gövde metni 16px. Ölçüp düzelttik.
+   ──────────────────────────────────────────────────────────────────────── */
+
+body.current-page-page-detail .contentbox-header,
+body.current-page-page-detail .contentbox-body {
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body.current-page-page-detail .contentbox-header h4 {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #0f172a;
+  margin: 10px 0 2px;
+}
+
+body.current-page-page-detail .contentbox-body,
+body.current-page-page-detail .contentbox-body p,
+body.current-page-page-detail .contentbox-body li,
+body.current-page-page-detail .contentbox-body td,
+body.current-page-page-detail .contentbox-body th {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #334155;
+}
+
+body.current-page-page-detail .contentbox-body p { margin: 0 0 1.05em; }
+
+body.current-page-page-detail .contentbox-body h2 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+  margin: 2.1em 0 .7em;
+}
+
+body.current-page-page-detail .contentbox-body h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.45;
+  margin: 1.7em 0 .5em;
+}
+
+body.current-page-page-detail .contentbox-body p.lead {
+  font-size: 1.14rem;
+  line-height: 1.7;
+  color: #475569;
+  margin-bottom: 1.3em;
+}
+
+body.current-page-page-detail .contentbox-body a {
+  color: #0369a1;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+body.current-page-page-detail .contentbox-body a:hover { color: #075985; }
+
+body.current-page-page-detail .contentbox-body strong { color: #0f172a; }
+
+body.current-page-page-detail .contentbox-body ul,
+body.current-page-page-detail .contentbox-body ol {
+  padding-left: 1.35em;
+  margin: 0 0 1.1em;
+}
+body.current-page-page-detail .contentbox-body li { margin-bottom: .4em; }
+
+/* Word'den yapışmış satır içi yazı tipleri (Calibri vb.) nötrlenir */
+body.current-page-page-detail .contentbox-body [style*="font-family"] {
+  font-family: inherit !important;
+}
+
+/* Tema .table stillerini kırpmış; içerik sayfalarında tabloya görünüm veriyoruz */
+body.current-page-page-detail .contentbox-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 1.3em;
+}
+body.current-page-page-detail .contentbox-body th,
+body.current-page-page-detail .contentbox-body td {
+  border: 1px solid #e3e8ee;
+  padding: 9px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+body.current-page-page-detail .contentbox-body th {
+  background: #f7f9fb;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* SSS akordiyonu: varsayılan üçgeni gizle, sağa +/− koy */
+body.current-page-page-detail .contentbox-body summary::-webkit-details-marker { display: none; }
+body.current-page-page-detail .contentbox-body summary { position: relative; padding-right: 44px !important; }
+body.current-page-page-detail .contentbox-body summary::after {
+  content: "+";
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 1.35em;
+  font-weight: 400;
+  line-height: 1;
+}
+body.current-page-page-detail .contentbox-body details[open] summary::after { content: "\2212"; }
+body.current-page-page-detail .contentbox-body details[open] summary { border-bottom: 1px solid #eef2f6; }
+body.current-page-page-detail .contentbox-body details:hover { border-color: #cbd5e1; }
+
+/* İçindekiler kutusu */
+body.current-page-page-detail .contentbox-body nav.card ol { font-size: .96rem; }
+body.current-page-page-detail .contentbox-body nav.card li { margin-bottom: .35em; }
+
+@media (max-width: 767px) {
+  body.current-page-page-detail .contentbox-header h4 { font-size: 1.5rem; }
+  body.current-page-page-detail .contentbox-body,
+  body.current-page-page-detail .contentbox-body p,
+  body.current-page-page-detail .contentbox-body li { font-size: .98rem; }
+  body.current-page-page-detail .contentbox-body h2 { font-size: 1.28rem; }
+}
