@@ -16,6 +16,7 @@
      2) urun aciklamasinin DOM'da iki kez basilmasi
      3) footer'daki olu baglantilar (9 adet "/" adresine gidiyordu)
      4) bos "Tahmini Kargo Suresi" etiketi
+     4b) gercek disi urun/kategori sayisi iddiasi
      5) Cerez Politikasi footer baglantisi
      (canonical'a DOKUNULMUYOR - tema dogru basiyor, bkz. aramaNoindex notu)
 */
@@ -152,6 +153,38 @@
      degil; yasal metinler ise footer'da durur (Mesafeli Satis, Gizlilik,
      Iptal Iade, Kisisel Veriler orada). Cerez bandi da bu sayfaya baglaniyor,
      footer'dan erisilebilir olmasi KVKK acisindan dogru. */
+  /* ── 4b) Gercek disi sayi iddiasi ────────────────────────────────────────
+     Ana sayfa SEO metni "1.000'in üzerinde ürün, 30+ kategori" diyor; gercek
+     24.962 aktif urun ve 204 kategori (28 Eyl olculdu). Kurumsal B2B sayfasi
+     ise "24.000+ ürün, 200+ kategori" diyordu -> site kendi kendisiyle
+     celisiyordu. Sayi her senkronda degistigi icin dayanikli ifade secildi.
+
+     Tema editorundeki alana API'den erisilemiyor. Panelden duzeltilirse bu
+     blok kendiliginden islemsiz kalir (yalniz eski metni arar).
+     Metin DUGUMLERI degistirilir, innerHTML'e dokunulmaz — isaretleme ve
+     olay dinleyicileri bozulmasin. */
+  var METIN_DUZELTME = [
+    [/1\.000'in üzerinde ürün,\s*30\+\s*kategori/g,
+     "24.000'den fazla ürün, 200'ü aşkın kategori"],
+  ];
+
+  function metinDuzelt() {
+    try {
+      var g = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      var n, d;
+      while ((n = g.nextNode())) {
+        for (var i = 0; i < METIN_DUZELTME.length; i++) {
+          d = METIN_DUZELTME[i];
+          if (d[0].test(n.nodeValue)) {
+            d[0].lastIndex = 0;
+            n.nodeValue = n.nodeValue.replace(d[0], d[1]);
+          }
+          d[0].lastIndex = 0;
+        }
+      }
+    } catch (e) {}
+  }
+
   function cerezBaglantisi() {
     try {
       var HEDEF = "/sayfa/cerez-politikasi";
@@ -179,6 +212,7 @@
     ciftAciklamaTemizle();
     footerOluBaglantilar();
     bosKargoEtiketi();
+    metinDuzelt();
     cerezBaglantisi();
   }
 
