@@ -18,6 +18,7 @@
      4) bos "Tahmini Kargo Suresi" etiketi
      4b) gercek disi urun/kategori sayisi iddiasi
      5) Cerez Politikasi footer baglantisi
+     6) WhatsApp olcumu + baglamli hazir mesaj
      (canonical'a DOKUNULMUYOR - tema dogru basiyor, bkz. aramaNoindex notu)
 */
 (function () {
@@ -185,6 +186,75 @@
     } catch (e) {}
   }
 
+  /* ── 6) WhatsApp: olcum + baglamli mesaj ─────────────────────────────────
+     Site genelinde WhatsApp baglantisi var ama hepsi bos `wa.me/<no>` —
+     hazir mesaj yok ve tiklamalar hic olculmuyor. Ikisi de B2B tarafinda
+     lead kaybi: satis ekibi musterinin hangi urun/hangi niyetle yazdigini
+     bilmeden basliyor.
+
+     PDP'den gelen tiklama ile Kutahya servis sayfasindan gelen tiklama ayni
+     sey degil; GA4'e ayri baglamla gonderiliyor. */
+  function waBaglam(yol) {
+    if (/^\/urun\//.test(yol)) return "urun";
+    if (/^\/kategori\//.test(yol)) return "kategori";
+    if (/kutahya-magaza-teknik-servis/.test(yol)) return "servis";
+    if (/^\/sayfa\/(kurumsal|kamu)/.test(yol)) return "kurumsal";
+    if (yol === "/") return "anasayfa";
+    return "diger";
+  }
+
+  function waMesaj(baglam, ad, url) {
+    if (baglam === "urun" && ad) {
+      return "Merhaba, şu ürün hakkında bilgi almak istiyorum:\n" + ad +
+             "\n" + url;
+    }
+    if (baglam === "kurumsal") return "Merhaba, kurumsal teklif almak istiyorum.";
+    if (baglam === "servis") return "Merhaba, teknik servis randevusu almak istiyorum.";
+    if (baglam === "kategori" && ad) {
+      return "Merhaba, " + ad + " kategorisinde ürün danışmanlığı istiyorum.";
+    }
+    return "";
+  }
+
+  function whatsapp() {
+    try {
+      var yol = location.pathname.replace(/\/+$/, "") || "/";
+      var baglam = waBaglam(yol);
+      var b1 = document.querySelector("h1");
+      var ad = b1 ? (b1.textContent || "").replace(/\s+/g, " ").trim() : "";
+      var mesaj = waMesaj(baglam, ad, location.origin + yol);
+
+      var bag = document.querySelectorAll('a[href*="wa.me"], a[href*="api.whatsapp.com"]');
+      for (var i = 0; i < bag.length; i++) {
+        (function (a) {
+          if (a.getAttribute("data-bgz-wa")) return;
+          a.setAttribute("data-bgz-wa", "1");
+
+          /* Hazir mesaj yalnizca bagli bir metin varsa ve baglantida zaten
+             text parametresi yoksa eklenir. */
+          var href = a.getAttribute("href") || "";
+          if (mesaj && href.indexOf("text=") === -1) {
+            a.setAttribute("href", href + (href.indexOf("?") === -1 ? "?" : "&") +
+                           "text=" + encodeURIComponent(mesaj));
+          }
+
+          a.addEventListener("click", function () {
+            try {
+              window.dataLayer = window.dataLayer || [];
+              window.dataLayer.push({
+                event: "whatsapp_click",
+                page_type: baglam,
+                page_url: location.href,
+                lead_context: baglam,
+                product_name: baglam === "urun" ? ad : undefined
+              });
+            } catch (e) {}
+          });
+        })(bag[i]);
+      }
+    } catch (e) {}
+  }
+
   function cerezBaglantisi() {
     try {
       var HEDEF = "/sayfa/cerez-politikasi";
@@ -213,6 +283,7 @@
     footerOluBaglantilar();
     bosKargoEtiketi();
     metinDuzelt();
+    whatsapp();
     cerezBaglantisi();
   }
 
