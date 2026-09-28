@@ -12,6 +12,7 @@
 
    Icindekiler:
      1) /arama noindex             — arama sonucu sayfalari indeksleniyordu
+     1b) ?tp=1 canonical           — temiz URL'nin birebir kopyasiydi
      2) urun aciklamasinin DOM'da iki kez basilmasi
      3) footer'daki olu baglantilar (9 adet "/" adresine gidiyordu)
      4) bos "Tahmini Kargo Suresi" etiketi
@@ -49,6 +50,26 @@
       if (!/noindex/i.test(m.getAttribute("content") || "")) {
         m.setAttribute("content", "noindex,follow");
       }
+    } catch (e) {}
+  }
+
+  /* ── 1b) Tek canonical kusuru: ?tp=1 ─────────────────────────────────────
+     Temanin sayfalama canonical'i dogru (?tp=2 -> kendisi) ama ?tp=1 de
+     kendine canonical veriyor; oysa icerigi temiz URL ile BIREBIR AYNI
+     (28 Eyl: /kategori/bellek-ram ve ?tp=1 ayni 40 urun, MD5 esit; ?tp=2
+     farkli). ?tp=2'nin rel=prev'i ?tp=1'e isaret ettiginden Google onu
+     kesfediyor -> 204 kategoride kopya cift.
+
+     YALNIZ tp=1'e dokunulur. tp=2+ kendi canonical'inda kalir — butun
+     sayfalari 1. sayfaya toplamak sayfalamayi indeksten dusururdu.
+     Yeni etiket OLUSTURULMAZ, var olanin href'i duzeltilir; boylece DOM'da
+     canonical sayisi hicbir kosulda artmaz. */
+  function tp1Canonical() {
+    try {
+      if (new URLSearchParams(location.search).get("tp") !== "1") return;
+      var c = document.querySelector('link[rel="canonical"]');
+      if (!c) return;
+      c.setAttribute("href", location.origin + location.pathname);
     } catch (e) {}
   }
 
@@ -154,6 +175,7 @@
 
   function calistir() {
     aramaNoindex();
+    tp1Canonical();
     ciftAciklamaTemizle();
     footerOluBaglantilar();
     bosKargoEtiketi();
@@ -163,6 +185,7 @@
   /* robots etiketi <head>'e mumkun olan en erken anda girsin; DOM'a dokunan
      isler belge hazir olunca. */
   aramaNoindex();
+  tp1Canonical();
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", calistir);
   } else {
