@@ -11,68 +11,48 @@
    kullan, alan byte butcesi dar).
 
    Icindekiler:
-     1) canonical etiketi          — tema HIC basmiyor (27 Eyl olculdu)
-     2) /arama noindex             — arama sonucu sayfalari indeksleniyordu
-     3) urun aciklamasinin DOM'da iki kez basilmasi
-     4) footer'daki olu baglantilar (9 adet "/" adresine gidiyordu)
-     5) bos "Tahmini Kargo Suresi" etiketi
-     6) Cerez Politikasi footer baglantisi
+     1) /arama noindex             — arama sonucu sayfalari indeksleniyordu
+     2) urun aciklamasinin DOM'da iki kez basilmasi
+     3) footer'daki olu baglantilar (9 adet "/" adresine gidiyordu)
+     4) bos "Tahmini Kargo Suresi" etiketi
+     5) Cerez Politikasi footer baglantisi
+     (canonical'a DOKUNULMUYOR - tema dogru basiyor, bkz. aramaNoindex notu)
 */
 (function () {
   if (window.__bgzEk) return;
   window.__bgzEk = 1;
 
-  var KOK = "https://www.bogazicibilgisayar.com.tr";
 
-  /* ── 1 + 2) canonical ve robots ──────────────────────────────────────────
-     Tema hicbir sayfada <link rel="canonical"> basmiyor; bu yuzden
-     /kategori/X?marka=Y sayfasi ana kategoriyle AYNI basligi tasiyip Google'a
-     ayri sayfa gibi gorunuyor.
+  /* ── 1) Arama sonucu sayfalari indekslenmesin ────────────────────────────
+     Tema /arama icin robots'u "index, follow" basiyor; arama sonucu ince bir
+     sayfa ve organik giris sayfasi olmamali. Var olan etiketi noindex'e
+     ceviriyoruz (yoksa ekliyoruz).
 
-     Politika (yanlis canonical sayfa dusurur, o yuzden temkinli):
-       /arama…                     -> canonical YOK, noindex,follow
-       kategori + filtre parametresi -> ana kategoriye (parametresiz)
-       kategori + yalniz ?tp=N     -> KENDISINE (sayfalamada Google'in onerisi)
-       diger her sayfa             -> parametresiz kendisine
-     Izleme parametreleri (utm_, gclid, fbclid…) her durumda atilir. */
-  var FILTRE = ["marka", "brand", "fiyat", "price", "ozellik", "filter",
-                "renk", "color", "stok", "sort", "siralama", "orderby"];
+     robots.txt'e Disallow EKLENMEDI: crawl engellenirse Google noindex'i
+     goremez ve zaten indekste olan adresler dusmez.
 
-  function canonicalKur() {
+     CANONICAL'A DOKUNULMUYOR: tema canonical'i her sayfa turunde ve DOGRU
+     politikayla basiyor (28 Eyl olculdu: ?marka= -> ana kategori, ?tp=N ->
+     kendisi, urun/sayfa -> kendisi). Etiketleri TEK TIRNAKLA bastigi icin ilk
+     olcumde gozden kacmisti; enjeksiyon gereksiz ve temanin degeriyle
+     catisma riski tasiyor. */
+  function aramaNoindex() {
     try {
       var yol = location.pathname.replace(/\/+$/, "") || "/";
-      var par = new URLSearchParams(location.search);
-
-      if (/^\/arama(\/|$)/.test(yol)) {
-        /* Arama sonucu organik giris sayfasi olmamali. robots.txt'e Disallow
-           EKLENMEDI: engellenirse Google noindex'i goremez ve zaten indekste
-           olan adresler dusmez. */
-        if (!document.querySelector('meta[name="robots"]')) {
-          var mr = document.createElement("meta");
-          mr.setAttribute("name", "robots");
-          mr.setAttribute("content", "noindex,follow");
-          document.head.appendChild(mr);
-        }
-        return;
+      if (!/^\/arama(\/|$)/.test(yol)) return;
+      var m = document.querySelector('meta[name="robots"]');
+      if (!m) {
+        m = document.createElement("meta");
+        m.setAttribute("name", "robots");
+        document.head.appendChild(m);
       }
-
-      var filtreVar = FILTRE.some(function (k) { return par.has(k); });
-      var hedef = KOK + yol;
-      if (!filtreVar && par.get("tp")) hedef += "?tp=" + par.get("tp");
-
-      var mevcut = document.querySelector('link[rel="canonical"]');
-      if (mevcut) {                       /* tema ileride basmaya baslarsa */
-        if (!mevcut.getAttribute("href")) mevcut.setAttribute("href", hedef);
-        return;
+      if (!/noindex/i.test(m.getAttribute("content") || "")) {
+        m.setAttribute("content", "noindex,follow");
       }
-      var l = document.createElement("link");
-      l.setAttribute("rel", "canonical");
-      l.setAttribute("href", hedef);
-      document.head.appendChild(l);
     } catch (e) {}
   }
 
-  /* ── 3) Urun aciklamasi DOM'da iki kez ───────────────────────────────────
+  /* ── 2) Urun aciklamasi DOM'da iki kez ───────────────────────────────────
      Tema aciklamayi hem sekme panelinde hem icerik sarmalayicisinda basiyor
      (27 Eyl: iki blogun ilk 400 karakterinin MD5'i birebir ayni). Biri CSS
      ile gizli oldugu icin GORUNMEYENI kaldiriyoruz — hangisinin gizli oldugu
@@ -93,7 +73,7 @@
     } catch (e) {}
   }
 
-  /* ── 4) Footer'daki olu baglantilar ──────────────────────────────────────
+  /* ── 3) Footer'daki olu baglantilar ──────────────────────────────────────
      9 baglanti href="/" ile ana sayfaya gidiyordu; "Kategoriler" sutunundaki
      bes kategori (Aksesuar, Kameralar, Konsol, Kulakliklar, Giyilebilir
      Teknoloji) magazada HIC yok. Yerine gercek ust kategoriler konuyor.
@@ -131,7 +111,7 @@
     } catch (e) {}
   }
 
-  /* ── 5) Bos "Tahmini Kargo Suresi" etiketi ───────────────────────────────
+  /* ── 4) Bos "Tahmini Kargo Suresi" etiketi ───────────────────────────────
      Etiket basiliyor ama deger hic gelmiyor; yaninda zaten "Stokta var, hemen
      kargoda" mesaji var. Degeri olmayan etiket gizleniyor, dolu olan kalir. */
   function bosKargoEtiketi() {
@@ -146,7 +126,7 @@
     } catch (e) {}
   }
 
-  /* ── 6) Cerez Politikasi footer baglantisi ───────────────────────────────
+  /* ── 5) Cerez Politikasi footer baglantisi ───────────────────────────────
      Panel > Menu Yonetimi'ne eklenen ogeler UST menuye gidiyor, footer'a
      degil; yasal metinler ise footer'da durur (Mesafeli Satis, Gizlilik,
      Iptal Iade, Kisisel Veriler orada). Cerez bandi da bu sayfaya baglaniyor,
@@ -173,16 +153,16 @@
   }
 
   function calistir() {
-    canonicalKur();
+    aramaNoindex();
     ciftAciklamaTemizle();
     footerOluBaglantilar();
     bosKargoEtiketi();
     cerezBaglantisi();
   }
 
-  /* canonical <head>'e mumkun olan en erken anda girsin; DOM'a dokunan isler
-     belge hazir olunca. */
-  canonicalKur();
+  /* robots etiketi <head>'e mumkun olan en erken anda girsin; DOM'a dokunan
+     isler belge hazir olunca. */
+  aramaNoindex();
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", calistir);
   } else {
