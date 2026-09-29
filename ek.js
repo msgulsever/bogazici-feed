@@ -22,6 +22,7 @@
      6) WhatsApp olcumu + baglamli hazir mesaj
      7) "En Populer Olanlar" basligi (liste kategoriye gore degismiyor)
      8) urun sayfasinda KDV dahil tutar hic gorunmuyordu
+     9) bos /blog ve /haberler sayfalari indeksleniyordu
      (canonical'a DOKUNULMUYOR - tema dogru basiyor, bkz. aramaNoindex notu)
 */
 (function () {
@@ -42,19 +43,23 @@
      kendisi, urun/sayfa -> kendisi). Etiketleri TEK TIRNAKLA bastigi icin ilk
      olcumde gozden kacmisti; enjeksiyon gereksiz ve temanin degeriyle
      catisma riski tasiyor. */
+  function robotsNoindex() {
+    var m = document.querySelector('meta[name="robots"]');
+    if (!m) {
+      m = document.createElement("meta");
+      m.setAttribute("name", "robots");
+      document.head.appendChild(m);
+    }
+    if (!/noindex/i.test(m.getAttribute("content") || "")) {
+      m.setAttribute("content", "noindex,follow");
+    }
+  }
+
   function aramaNoindex() {
     try {
       var yol = location.pathname.replace(/\/+$/, "") || "/";
       if (!/^\/arama(\/|$)/.test(yol)) return;
-      var m = document.querySelector('meta[name="robots"]');
-      if (!m) {
-        m = document.createElement("meta");
-        m.setAttribute("name", "robots");
-        document.head.appendChild(m);
-      }
-      if (!/noindex/i.test(m.getAttribute("content") || "")) {
-        m.setAttribute("content", "noindex,follow");
-      }
+      robotsNoindex();
     } catch (e) {}
   }
 
@@ -346,8 +351,35 @@
     } catch (e) {}
   }
 
+  /* ── 9) Bos blog/haber sayfalari indeksleniyor ───────────────────────────
+     Uc sayfa da BOS ve ucu de sitemap'te, robots etiketi yok (29 Eyl olculdu;
+     sitemap_blogPost_1.xml'de 0 adres):
+       /blog                  -> "Blog bulunamadi."
+       /blog/kategori/genel   -> "Blog bulunamadi."
+       /haberler              -> "Haber Bulunamadi"
+     Yani Google'a bos sayfalari indeksle deniyor.
+
+     KENDILIGINDEN IYILESEN kural: noindex yalnizca temanin BOS DURUM kabi
+     dururken konuyor. Ilk yazi yayinlandigi anda o kap kaybolur ve sayfa
+     yeniden indekslenebilir olur — burayi geri almak gerekmez.
+
+     `follow` birakiliyor: sayfadaki menu/footer baglantilari taranmaya devam
+     etsin. robots.txt'e Disallow EKLENMEZ (crawl engellenirse Google noindex'i
+     goremez). Blog icerigi Admin API'den yazilamiyor (blogs/posts/articles
+     uclari 404) — yayin panelden yapilacak. */
+  function bosListeNoindex() {
+    try {
+      var yol = location.pathname.replace(/\/+$/, "") || "/";
+      if (!/^\/(blog|haberler)(\/|$)/.test(yol)) return;
+      var kap = document.querySelector("#main .information-content");
+      if (!kap || !/bulunamad/i.test(kap.textContent)) return;
+      robotsNoindex();
+    } catch (e) {}
+  }
+
   function calistir() {
     aramaNoindex();
+    bosListeNoindex();
     tp1Canonical();
     ciftAciklamaTemizle();
     footerOluBaglantilar();
