@@ -17,8 +17,10 @@
      3) footer'daki olu baglantilar (9 adet "/" adresine gidiyordu)
      4) bos "Tahmini Kargo Suresi" etiketi
      4b) gercek disi urun/kategori sayisi iddiasi
+     4c) "orijinal urun" vaadi muadil katalogla celisiyordu
      5) Cerez Politikasi footer baglantisi
      6) WhatsApp olcumu + baglamli hazir mesaj
+     7) "En Populer Olanlar" basligi (liste kategoriye gore degismiyor)
      (canonical'a DOKUNULMUYOR - tema dogru basiyor, bkz. aramaNoindex notu)
 */
 (function () {
@@ -164,9 +166,24 @@
      blok kendiliginden islemsiz kalir (yalniz eski metni arar).
      Metin DUGUMLERI degistirilir, innerHTML'e dokunulmaz — isaretleme ve
      olay dinleyicileri bozulmasin. */
+  /* ── 4c) "Orijinal urun" vaadi muadil katalogla celisiyor ────────────────
+     Footer aciklamasi ve ana sayfa Hakkimizda metni "orijinal urun" ve
+     "Sadece yetkili distributorlerden tedarik" diyor. Katalogda adinda MUADIL
+     ya da UYUMLU gecen 827 ilan var (29 Eyl olculdu) ve Muadil Toner ayri bir
+     kategori; muadil markalar (PRINTPEN, OfisPc) HP'nin yetkili distributoru
+     degil. Iddia oldugu gibi yanlis.
+
+     Ayni iddia SEO ureteclerimizde de vardi (biosis.py kapanis blogu +
+     main.py kategori/marka sablonu) — orasi kaynakta duzeltildi. Footer/
+     Hakkimizda metni panel ayari; API'de karsiligi YOK (settings, shop,
+     store, contents ucları 404, themes 403 — 29 Eyl denendi), o yuzden JS. */
   var METIN_DUZELTME = [
     [/1\.000'in üzerinde ürün,\s*30\+\s*kategori/g,
      "24.000'den fazla ürün, 200'ü aşkın kategori"],
+    [/misyonumuz; orijinal ürün, doğru danışmanlık/g,
+     "misyonumuz; doğru ürün, doğru danışmanlık"],
+    [/Orijinal ve garantili ürünler — Sadece yetkili distribütörlerden tedarik/g,
+     "Faturalı ve garantili ürünler — Orijinal ve muadil seçenekler bir arada"],
   ];
 
   function metinDuzelt() {
@@ -276,6 +293,26 @@
     } catch (e) {}
   }
 
+  /* ── 7) "En Populer Olanlar" blok basligi ─────────────────────────────────
+     Tema bu blogu kategori sayfasinin yan kolonunda basiyor ama liste
+     kategoriye gore DEGISMIYOR: /kategori/bellek-ram ile
+     /kategori/muadil-tonerler birebir ayni 5 urunu gosteriyor ve hicbiri RAM
+     degil (29 Eyl olculdu). Musteri bunlari o kategorinin populer urunleri
+     saniyor. Listeyi kategoriye gore kurmak API'den mumkun degil (hicbir
+     urunde popularSortOrder yok), dolayisiyla dogru olan basligi gercege
+     uydurmak. Baslikta Turkce harf de yoktu ("Populer"). */
+  function populerBlokBasligi() {
+    try {
+      var b = document.querySelectorAll(
+        '[data-type="popular-product-list"] .block-item-title span');
+      for (var i = 0; i < b.length; i++) {
+        if (/^\s*En Pop[uü]ler Olanlar\s*$/.test(b[i].textContent)) {
+          b[i].textContent = "Site Genelinde Popüler Ürünler";
+        }
+      }
+    } catch (e) {}
+  }
+
   function calistir() {
     aramaNoindex();
     tp1Canonical();
@@ -283,6 +320,7 @@
     footerOluBaglantilar();
     bosKargoEtiketi();
     metinDuzelt();
+    populerBlokBasligi();
     whatsapp();
     cerezBaglantisi();
   }
