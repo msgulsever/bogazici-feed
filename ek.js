@@ -21,6 +21,7 @@
      5) Cerez Politikasi footer baglantisi
      6) WhatsApp olcumu + baglamli hazir mesaj
      7) "En Populer Olanlar" basligi (liste kategoriye gore degismiyor)
+     8) urun sayfasinda KDV dahil tutar hic gorunmuyordu
      (canonical'a DOKUNULMUYOR - tema dogru basiyor, bkz. aramaNoindex notu)
 */
 (function () {
@@ -313,6 +314,38 @@
     } catch (e) {}
   }
 
+  /* ── 8) KDV dahil tutar urun sayfasinda hic gorunmuyor ───────────────────
+     Urun sayfasi "₺7.566 + KDV" yaziyor; KDV dahil tutar yalnizca GORUNMEZ bir
+     <meta itemprop="price"> icinde duruyor (9079.01). Oysa Merchant beslemesi,
+     sayfanin kendi JSON-LD'si ve Akakce/Cimri listelemeleri hep KDV DAHIL
+     tutari gosteriyor: Google Alisveris'te ₺9.079,01 gorup gelen musteri
+     sayfada ₺7.566 goruyor ve odemede 9.079 oduyor. Fiyat etiketi mevzuati da
+     tuketiciye vergi dahil satis fiyatinin gosterilmesini bekliyor.
+
+     Net fiyat KALDIRILMIYOR — B2B musterisi onu istiyor; KDV dahil tutar
+     ALTINA ekleniyor. Tutar sayfadaki meta'dan OKUNUYOR, hesaplanmiyor: yanlis
+     KDV orani varsayma riski yok. Yalniz urun detay sayfasinda; kategori
+     kartlarina dokunulmuyor. Gorunen fiyat TL degilse (USD listelenen urunler)
+     eklenmiyor. */
+  function kdvDahilSatir() {
+    try {
+      var kap = document.querySelector(".product-price-wrapper .product-price");
+      if (!kap || kap.querySelector("[data-bgz-kdv]")) return;
+      var yeni = kap.querySelector(".product-price-new");
+      if (!yeni || !/\+\s*KDV/i.test(yeni.textContent)) return;
+      if (yeni.textContent.indexOf("₺") === -1) return;
+      var m = document.querySelector('meta[itemprop="price"]');
+      var brut = m && parseFloat(m.getAttribute("content"));
+      if (!isFinite(brut) || brut <= 0) return;
+      var s = document.createElement("div");
+      s.setAttribute("data-bgz-kdv", "1");
+      s.style.cssText = "font-size:.85em;opacity:.8;margin-top:2px";
+      s.textContent = "KDV dahil ₺" + brut.toLocaleString("tr-TR",
+        { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      kap.appendChild(s);
+    } catch (e) {}
+  }
+
   function calistir() {
     aramaNoindex();
     tp1Canonical();
@@ -321,6 +354,7 @@
     bosKargoEtiketi();
     metinDuzelt();
     populerBlokBasligi();
+    kdvDahilSatir();
     whatsapp();
     cerezBaglantisi();
   }
